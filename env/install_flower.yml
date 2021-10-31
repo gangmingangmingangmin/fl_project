@@ -1,0 +1,13 @@
+---
+  - hosts: iotmasterservers,iotslaveservers
+    become: yes
+    tasks:
+      - name: Installing flower
+        pip: name={{item.name}}
+        with_items:
+        - name: flwr
+        - name: tensorflow
+        - name: sklearn
+        - name: pandas
+        - name: boto3
+        - name: Callable

@@ -1,0 +1,12 @@
+# upload_run.yml
+
+---
+  - hosts: iotslaveservers
+    tasks:
+      - name: Upload python file
+        copy:
+          src: ./client.py
+          dest: /home/ec2-user
+          mode: 0755
+      - name: run python
+        script: /home/ec2-user/client.py "{{ inventory_hostname }}"
