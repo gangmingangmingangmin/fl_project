@@ -1,0 +1,10 @@
+# upload_run.yml
+
+---
+  - hosts: iotslaveservers1,iotslaveservers2,iotslaveservers3
+    tasks:
+      - name: Upload python file
+        copy:
+          src: ./client.py
+          dest: /home/ec2-user
+          mode: 0755
