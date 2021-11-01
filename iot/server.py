@@ -7,7 +7,6 @@ import sys
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 NUM_ROUND=1
 
-
 #data load from boto3
 def divide_list(arr,n):
     for i in range(0,len(arr),n):
@@ -49,14 +48,15 @@ def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
 
 strategy = fl.server.strategy.FedAvg(
     fraction_fit=1,  # Sample 10% of available clients for the next round
-    min_fit_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients to be sampled for the next round
-    min_available_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients that need to be connected to the server before a training round can start
-    min_eval_clients=MIN_AVAILABLE_CLIENTS, # default = 2
+    min_fit_clients=3,#MIN_AVAILABLE_CLIENTS,  # Minimum number of clients to be sampled for the next round
+    min_available_clients=3,#MIN_AVAILABLE_CLIENTS,  # Minimum number of clients that need to be connected to the server before a training round can start
+    min_eval_clients=3,#MIN_AVAILABLE_CLIENTS, # default = 2
     on_fit_config_fn=get_on_fit_config_fn(),
 )
 
 import time
 #federated learning
+print('start')
 start_time = time.time()
 fl.server.start_server(config={"num_rounds": NUM_ROUND},strategy=strategy)
 end_time = time.time()
