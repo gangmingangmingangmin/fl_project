@@ -1,17 +1,17 @@
 # upload_run.yml
 
 ---
-  - hosts: iotslaveservers1,iotslaveservers2,iotslaveservers3
+  - hosts: iotsubmasterservers,iotslaveservers1,iotslaveservers2,iotslaveservers3
     tasks:
       - name: Upload scaler file
         copy:
-          src: ~/scaler_train.pickle
+          src: /home/ec2-user/fl_project/data/scaler_train.pickle
           dest: /home/ec2-user
           mode: 0755
   - hosts: iotslaveservers1,iotslaveservers2,iotslaveservers3
     tasks:
       - name: Upload eval file
         copy:
-          src: ~/ts_file0.pkl
+          src: /home/ec2-user/fl_project/data/ts_file0.pkl
           dest: /home/ec2-user
           mode: 0755
