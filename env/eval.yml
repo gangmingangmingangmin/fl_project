@@ -8,7 +8,7 @@
           src: /home/ec2-user/fl_project/data/scaler_train.pickle
           dest: /home/ec2-user
           mode: 0755
-  - hosts: iotslaveservers1,iotslaveservers2,iotslaveservers3
+  - hosts: iotsubmasterservers,iotslaveservers1,iotslaveservers2,iotslaveservers3
     tasks:
       - name: Upload eval file
         copy:
