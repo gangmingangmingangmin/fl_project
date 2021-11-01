@@ -24,7 +24,10 @@ from tensorflow.keras.utils import Sequence
 import time
 import sys
 #############################################
-cid = int(sys.argv[1][2:])-1
+if len(sys.argv[1]) == 3:
+  cid = int(sys.argv[1][2:])-1
+else:
+  cid = int(sys.argv[1][3:])-1
 ##############################################
 #loader
 class TimeSeriesLoader:

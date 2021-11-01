@@ -1,12 +1,20 @@
 # upload_run.yml
 
 ---
-  - hosts: iotslaveservers
+  - hosts: iotmasterservers
     tasks:
-      - name: Upload python file
+      - name: run server
+        command: "python3 server.py 9"
+        async: 3600
+        poll: 0
+      - name: sleep
+        script: ./sleep.py
+  - hosts: iotsubmasterservers,iotslaveservers*
+    tasks:
+      - name: Upload client file
         copy:
-          src: ./client.py
+          src: ./client_g.py
           dest: /home/ec2-user
           mode: 0755
-      - name: run python
-        script: /home/ec2-user/client.py "{{ inventory_hostname }}"
+      - name: run client
+        command: "python3 /home/ec2-user/client_g.py {{ inventory_hostname }}"
