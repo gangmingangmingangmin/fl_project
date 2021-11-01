@@ -1,7 +1,7 @@
 # upload_run.yml
 
 ---
-  - hosts: iotslaveservers1,iotslaveservers2,iotslaveservers3
+  - hosts: iotslaveservers3
     tasks:
       - name: Upload python file
         copy:

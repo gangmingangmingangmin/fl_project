@@ -3,18 +3,21 @@
 ---
   - hosts: iotsubmasterservers
     tasks:
-      - name: Upload python file
+      - name: Upload server file
         copy:
           src: ./server.py
           dest: /home/ec2-user
           mode: 0755
-      - name: run python
+      - name: run server
         command: "python3 server.py 9"
         async: 3600
         poll: 0
+  - hosts: iotmasterservers
+    tasks:
       - name: sleep
-        script: /home/ec2-user/sleep.py
+        script: ./sleep.py
   - hosts: iotslaveservers*
     tasks:
-    - name: run client
-      script: /home/ec2-user/client.py "{{ inventory_hostname }}"
+      - name: run client
+        #script: /home/ec2-user/client.py "{{ inventory_hostname }}" run local script on remote
+        command: "python3 /home/ec2-user/client.py {{ inventory_hostname }}"

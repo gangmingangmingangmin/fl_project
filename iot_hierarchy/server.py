@@ -5,7 +5,7 @@ from typing import Callable, Dict
 import sys
 
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
-NUM_ROUND=2
+NUM_ROUND=1
 
 
 #data load from boto3
