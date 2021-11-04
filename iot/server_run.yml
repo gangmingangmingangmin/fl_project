@@ -4,12 +4,12 @@
   - hosts: iotmasterservers
     tasks:
       - name: run server
-        command: "python3 /home/ec2-user/fl_project/iot/server.py 9"
+        command: "python3 /home/ec2-user/fl_project/iot/server.py 27"
         async: 3600
         poll: 0
       - name: sleep
         command: "python3 /home/ec2-user/fl_project/iot/sleep.py"
-  - hosts: iotsubmasterservers,iotslaveservers*
+  - hosts: iotslaveservers*
     tasks:
       - name: Upload client file
         copy:
@@ -18,3 +18,4 @@
           mode: 0755
       - name: run client
         command: "python3 /home/ec2-user/client_g.py {{ inventory_hostname }}"
+  
