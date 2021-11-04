@@ -23,8 +23,9 @@ from tensorflow.keras import layers
 from tensorflow.keras.utils import Sequence
 import time
 import sys
-#############################################
+##############################################
 if len(sys.argv[1]) == 3:
+  gid = int(sys.argv[1][0])-1
   cid = int(sys.argv[1][2:])-1
 else:
   cid = int(sys.argv[1][3:])-1
@@ -32,8 +33,11 @@ else:
 #loader
 class TimeSeriesLoader:
     def __init__(self,file_n,div):
-        self.start_index=cid*div
-        min_n = min(file_n,self.start_index+div)
+        if file_n>=9:
+          self.start_index=gid*div+cid*12
+        else:
+          self.start_index=cid*div
+        min_n = min(file_n,self.start_index+div) # 파일 크기 안넘도록
         self.num_files = min_n-self.start_index
         self.files_indices = np.arange(self.num_files)
         self.shuffle_chunks()
