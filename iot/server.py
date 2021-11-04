@@ -32,6 +32,10 @@ for page in response_iterator:
 #    if content[-4:]=='.pkl':
 #        file_n+=1
 
+# 데이터 수를 노드 수에 맞추기 위한 코드
+file_n = 108 #고정
+
+# 나머지 분배코드, 사용x
 if file_n % MIN_AVAILABLE_CLIENTS > 0:
     DIV = file_n // MIN_AVAILABLE_CLIENTS +1
 else:
@@ -48,9 +52,9 @@ def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
 
 strategy = fl.server.strategy.FedAvg(
     fraction_fit=1,  # Sample 10% of available clients for the next round
-    min_fit_clients=3,#MIN_AVAILABLE_CLIENTS,  # Minimum number of clients to be sampled for the next round
-    min_available_clients=3,#MIN_AVAILABLE_CLIENTS,  # Minimum number of clients that need to be connected to the server before a training round can start
-    min_eval_clients=3,#MIN_AVAILABLE_CLIENTS, # default = 2
+    min_fit_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients to be sampled for the next round
+    min_available_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients that need to be connected to the server before a training round can start
+    min_eval_clients=MIN_AVAILABLE_CLIENTS, # default = 2
     on_fit_config_fn=get_on_fit_config_fn(),
 )
 
