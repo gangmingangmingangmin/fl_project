@@ -1,9 +1,11 @@
 #!/usr/bin/python3.7
 
 import flwr as fl
-from typing import Callable, Dict
+from typing import Callable, Dict, Optional, Tuple
 from sklearn.metrics import mean_squared_error, accuracy_score
 import sys
+import tensorflow as tf
+from tensorflow.keras import layers
 
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 NUM_ROUND=1
@@ -79,13 +81,24 @@ def get_eval_fn(model):
 
     return evaluate
 
+# model
+ts_inputs = tf.keras.Input(shape=(1008,1))
+x = layers.LSTM(units=10)(ts_inputs)
+x = layers.Dropout(0.2)(x)
+outputs = layers.Dense(1, activation='linear')(x)
+model = tf.keras.Model(inputs=ts_inputs, outputs=outputs)
+
+model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=0.01),
+          loss=tf.keras.losses.MeanSquaredError(),
+          metrics=['mse'])
+
 strategy = fl.server.strategy.FedAvg(
     fraction_fit=1,  # Sample 10% of available clients for the next round
     min_fit_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients to be sampled for the next round
     min_available_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients that need to be connected to the server before a training round can start
     min_eval_clients=MIN_AVAILABLE_CLIENTS, # default = 2
     on_fit_config_fn=get_on_fit_config_fn(),
-    #on_evaluate_config_fn = eval_fn?
+    eval_fn = get_eval_fn(model)
 )
 
 import time
