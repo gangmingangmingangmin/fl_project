@@ -115,7 +115,7 @@ class flClient(fl.client.NumPyClient):
                 model.fit(x=X, y=y, batch_size=BATCH_SIZE)
         
         return model.get_weights(), x_len, {}
-
+    '''
     def evaluate(self, parameters, config):
         # testdata
         df_val_ts = pd.read_pickle('/home/ec2-user/ts_file0.pkl')
@@ -137,6 +137,6 @@ class flClient(fl.client.NumPyClient):
         y_act = df_val_ts['y'].values
         y_act = scaler.inverse_transform(y_act.reshape(-1, 1)).reshape(-1 ,)
         return mean_squared_error(y_act, y_pred), len(features_batchmajor),  {"MSE": mean_squared_error(y_act, y_pred)}
-
+    '''
 # Start Flower client
 fl.client.start_numpy_client(server_address="172.31.18.91:8080", client=flClient())

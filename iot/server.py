@@ -2,6 +2,7 @@
 
 import flwr as fl
 from typing import Callable, Dict
+from sklearn.metrics import mean_squared_error, accuracy_score
 import sys
 
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
@@ -41,14 +42,42 @@ if file_n % MIN_AVAILABLE_CLIENTS > 0:
 else:
     DIV = file_n//MIN_AVAILABLE_CLIENTS
 print(file_n,DIV)
-#strategy
 
+#fit strategy
 def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
     def fit_config(rnd:int) -> Dict[str,str]:
         config = {"epoch" : 1, "round":rnd, "file_n":file_n, "div":DIV, "n_round":NUM_ROUND}
         return config
     return fit_config
+#server side evaluation
+def get_eval_fn(model):
+    
+    # The `evaluate` function will be called after every round
+    def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
+        model.set_weights(weights)  # Update model with the latest parameters
 
+        # testdata
+        df_val_ts = pd.read_pickle('/home/ec2-user/ts_file0.pkl')
+        features = df_val_ts.drop('y', axis=1).values
+        features_arr = np.array(features)
+
+        # reshape for input into LSTM. Batch major format.
+        num_records = len(df_val_ts.index)
+        features_batchmajor = features_arr.reshape(num_records, -1, 1)
+
+        # Scaled to work with Neural networks.
+        with open('/home/ec2-user/scaler_train.pickle','rb') as f:
+            scaler = pickle.load(f)
+
+        y_pred = model.predict(features_batchmajor).reshape(-1, )
+        y_pred = scaler.inverse_transform(y_pred.reshape(-1, 1)).reshape(-1 ,)
+
+        y_act = df_val_ts['y'].values
+        y_act = scaler.inverse_transform(y_act.reshape(-1, 1)).reshape(-1 ,)
+        
+        return mean_squared_error(y_act, y_pred), accuracy_score(y_act, y_pred)
+
+    return evaluate
 
 strategy = fl.server.strategy.FedAvg(
     fraction_fit=1,  # Sample 10% of available clients for the next round
@@ -56,6 +85,7 @@ strategy = fl.server.strategy.FedAvg(
     min_available_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients that need to be connected to the server before a training round can start
     min_eval_clients=MIN_AVAILABLE_CLIENTS, # default = 2
     on_fit_config_fn=get_on_fit_config_fn(),
+    #on_evaluate_config_fn = eval_fn?
 )
 
 import time
