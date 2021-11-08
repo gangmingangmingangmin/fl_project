@@ -2,10 +2,13 @@
 
 import flwr as fl
 from typing import Callable, Dict, Optional, Tuple
-from sklearn.metrics import mean_squared_error, accuracy_score
+from sklearn.metrics import mean_squared_error, r2_score
 import sys
 import tensorflow as tf
 from tensorflow.keras import layers
+import pandas as pd
+import numpy as np
+import pickle
 
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 NUM_ROUND=1
@@ -59,7 +62,7 @@ def get_eval_fn(model):
         model.set_weights(weights)  # Update model with the latest parameters
 
         # testdata
-        df_val_ts = pd.read_pickle('/home/ec2-user/ts_file0.pkl')
+        df_val_ts = pd.read_pickle('/home/ec2-user/fl_project/data/ts_file0.pkl')
         features = df_val_ts.drop('y', axis=1).values
         features_arr = np.array(features)
 
@@ -68,7 +71,7 @@ def get_eval_fn(model):
         features_batchmajor = features_arr.reshape(num_records, -1, 1)
 
         # Scaled to work with Neural networks.
-        with open('/home/ec2-user/scaler_train.pickle','rb') as f:
+        with open('/home/ec2-user/fl_project/data/scaler_train.pickle','rb') as f:
             scaler = pickle.load(f)
 
         y_pred = model.predict(features_batchmajor).reshape(-1, )
@@ -76,8 +79,13 @@ def get_eval_fn(model):
 
         y_act = df_val_ts['y'].values
         y_act = scaler.inverse_transform(y_act.reshape(-1, 1)).reshape(-1 ,)
-        
-        return mean_squared_error(y_act, y_pred), accuracy_score(y_act, y_pred)
+        loss = mean_squared_error(y_act, y_pred)
+        accuracy =r2_score(y_act, y_pred)
+        f = open('/home/ec2-user/result.txt','w')
+        f.write("mse : "+str(loss)+"\n")
+        f.write("r2 : "+str(accuracy))
+        f.close()
+        return loss, {"r2_score":accuracy}
 
     return evaluate
 

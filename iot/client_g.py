@@ -37,7 +37,7 @@ class TimeSeriesLoader:
           self.start_index=gid*div+cid*12
         else:
           self.start_index=cid*div
-        min_n = min(file_n,self.start_index+div) # 파일 크기 안넘도록
+        min_n = min(file_n,self.start_index+div)# 파일 크기 안넘도록
         self.num_files = min_n-self.start_index
         self.files_indices = np.arange(self.num_files)
         self.shuffle_chunks()
@@ -115,11 +115,15 @@ class flClient(fl.client.NumPyClient):
                 model.fit(x=X, y=y, batch_size=BATCH_SIZE)
         
         return model.get_weights(), x_len, {}
+    def evaluate(self, parameters, config):
+      return 0,0,{"no evaluation":0}
     '''
+    # client side evaluation
     def evaluate(self, parameters, config):
         # testdata
         df_val_ts = pd.read_pickle('/home/ec2-user/ts_file0.pkl')
-        features = df_val_ts.drop('y', axis=1).values
+        features = df_val_ts.
+        drop('y', axis=1).values
         features_arr = np.array(features)
 
         # reshape for input into LSTM. Batch major format.
