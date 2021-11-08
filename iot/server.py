@@ -51,7 +51,7 @@ print(file_n,DIV)
 #fit strategy
 def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
     def fit_config(rnd:int) -> Dict[str,str]:
-        config = {"epoch" : 1, "round":rnd, "file_n":file_n, "div":DIV, "n_round":NUM_ROUND}
+        config = {"epoch" : 1, "round":rnd, "file_n":file_n, "div":DIV, "n_round":NUM_ROUND,"n_clients": MIN_AVAILABLE_CLIENTS}
         return config
     return fit_config
 #server side evaluation

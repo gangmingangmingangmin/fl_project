@@ -32,8 +32,8 @@ else:
 ##############################################
 #loader
 class TimeSeriesLoader:
-    def __init__(self,file_n,div):
-        if file_n>=9:
+    def __init__(self,file_n,div,n_clients):
+        if n_clients>9:
           self.start_index=gid*div+cid*12
         else:
           self.start_index=cid*div
@@ -94,7 +94,7 @@ class flClient(fl.client.NumPyClient):
 
     def fit(self,parameters,config):
         print(config)
-        tss=TimeSeriesLoader(config['file_n'],config['div'])
+        tss=TimeSeriesLoader(config['file_n'],config['div'],config['n_clients'])
         BATCH_SIZE = 128
         NUM_EPOCHS = config['epoch']
         NUM_CHUNKS = tss.num_chunks()
