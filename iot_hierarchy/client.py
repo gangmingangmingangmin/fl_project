@@ -24,12 +24,19 @@ from tensorflow.keras.utils import Sequence
 import time
 import sys
 #############################################
-cid = int(sys.argv[1][2:])-1
+if len(sys.argv[1]) == 3:
+  gid = int(sys.argv[1][0])-1
+  cid = int(sys.argv[1][2:])-1
+else:
+  cid = int(sys.argv[1][3:])-1
 ##############################################
 #loader
 class TimeSeriesLoader:
-    def __init__(self,file_n,div):
-        self.start_index=cid*div
+    def __init__(self,file_n,div,n_clients):
+        if n_clients>9:
+          self.start_index=gid*div+cid*12
+        else:
+          self.start_index=cid*div
         min_n = min(file_n,self.start_index+div)
         self.num_files = min_n-self.start_index
         self.files_indices = np.arange(self.num_files)
@@ -87,7 +94,7 @@ class flClient(fl.client.NumPyClient):
 
     def fit(self,parameters,config):
         print(config)
-        tss=TimeSeriesLoader(config['file_n'],config['div'])
+        tss=TimeSeriesLoader(config['file_n'],config['div'],config['n_clients'])
         BATCH_SIZE = 128
         NUM_EPOCHS = config['epoch']
         NUM_CHUNKS = tss.num_chunks()
@@ -108,7 +115,9 @@ class flClient(fl.client.NumPyClient):
                 model.fit(x=X, y=y, batch_size=BATCH_SIZE)
         
         return model.get_weights(), x_len, {}
-
+    def evaluate(self, parameters, config):
+      return 0,0,{"no evaluation":0}
+    '''
     def evaluate(self, parameters, config):
         # testdata
         df_val_ts = pd.read_pickle('/home/ec2-user/ts_file0.pkl')
@@ -130,6 +139,6 @@ class flClient(fl.client.NumPyClient):
         y_act = df_val_ts['y'].values
         y_act = scaler.inverse_transform(y_act.reshape(-1, 1)).reshape(-1 ,)
         return mean_squared_error(y_act, y_pred), len(features_batchmajor),  {"MSE": mean_squared_error(y_act, y_pred)}
-
+    '''
 # Start Flower client
-fl.client.start_numpy_client(server_address="172.31.18.242:8080", client=flClient())
+fl.client.start_numpy_client(server_address="172.31.31.17:8080", client=flClient())

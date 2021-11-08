@@ -9,13 +9,13 @@
           dest: /home/ec2-user
           mode: 0755
       - name: run server
-        command: "python3 ./server.py 9"
+        command: "python3 ./server.py 27"
         async: 3600
         poll: 0
   - hosts: iotmasterservers
     tasks:
       - name: sleep
-        script: "python3 /home/ec2-user/fl_project/iot_hierarchy/sleep.py"
+        command: "python3 /home/ec2-user/fl_project/iot_hierarchy/sleep.py"
   - hosts: iotslaveservers*
     tasks:
       - name: run client
