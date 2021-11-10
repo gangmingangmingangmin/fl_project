@@ -141,4 +141,4 @@ class flClient(fl.client.NumPyClient):
         return mean_squared_error(y_act, y_pred), len(features_batchmajor),  {"MSE": mean_squared_error(y_act, y_pred)}
     '''
 # Start Flower client
-fl.client.start_numpy_client(server_address="172.31.31.17:8080", client=flClient())
+fl.client.start_numpy_client(server_address="172.31.17.97:8080", client=flClient())
