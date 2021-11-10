@@ -37,8 +37,9 @@ class TimeSeriesLoader:
           self.start_index=gid*div+cid*12
         else:
           self.start_index=cid*div
-        min_n = min(file_n,self.start_index+div)# 파일 크기 안넘도록
-        self.num_files = min_n-self.start_index
+        #min_n = min(file_n,self.start_index+div)# 파일 크기 안넘도록
+        #self.num_files = min_n-self.start_index
+        self.num_files = div
         self.files_indices = np.arange(self.num_files)
         self.shuffle_chunks()
     def num_chunks(self):
