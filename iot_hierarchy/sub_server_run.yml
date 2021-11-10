@@ -9,7 +9,7 @@
           dest: /home/ec2-user
           mode: 0755
       - name: run server
-        command: "python3 ./server.py 18"
+        command: "python3 ./server.py 9 {{ inventory_hostname }}"
         async: 3600
         poll: 0
   - hosts: iotmasterservers
@@ -21,3 +21,7 @@
       - name: run client
         #script: /home/ec2-user/client.py "{{ inventory_hostname }}" run local script on remote
         command: "python3 /home/ec2-user/client.py {{ inventory_hostname }}"
+  - hosts: iotmasterservers
+    tasks:
+      - name: global weights evaluation
+        command: "python3 /home/ec2-user/fl_project/iot_hierarchy/weights_average.py"

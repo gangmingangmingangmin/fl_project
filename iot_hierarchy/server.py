@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import pickle
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
+ssid = sys.argv[2][3]
 NUM_ROUND=1
 
 
@@ -59,8 +60,10 @@ def get_eval_fn(model):
     # The `evaluate` function will be called after every round
     def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
         model.set_weights(weights)  # Update model with the latest parameters
-        with open('parameters.pickle','wb') as f:
+        with open('parameters'+ssid+'.pickle','wb') as f:
             pickle.dump(weights,f)
+        #s3 upload
+        client.upload_file('./parameters'+ssid+'.pickle','federatedlearning2','parameters'+ssid+'.pickle')
         return 0, {"r2_score":0}
 
     return evaluate
