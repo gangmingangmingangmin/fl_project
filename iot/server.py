@@ -11,7 +11,8 @@ import numpy as np
 import pickle
 
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
-NUM_ROUND=1
+NUM_ROUND=2
+NUM_EPOCHS = 5
 
 #data load from boto3
 def divide_list(arr,n):
@@ -51,7 +52,7 @@ print(file_n,DIV)
 #fit strategy
 def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
     def fit_config(rnd:int) -> Dict[str,str]:
-        config = {"epoch" : 5, "round":rnd, "file_n":file_n, "div":DIV, "n_round":NUM_ROUND,"n_clients": MIN_AVAILABLE_CLIENTS}
+        config = {"epoch" : NUM_EPOCHS, "round":rnd, "file_n":file_n, "div":DIV, "n_round":NUM_ROUND,"n_clients": MIN_AVAILABLE_CLIENTS}
         return config
     return fit_config
 #server side evaluation
