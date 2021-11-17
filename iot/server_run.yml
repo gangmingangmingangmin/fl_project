@@ -4,8 +4,8 @@
   - hosts: iotmasterservers
     tasks:
       - name: run server
-        command: "python3 /home/ec2-user/fl_project/iot/server.py 27"
-        async: 3600
+        command: "python3 /home/ec2-user/fl_project/iot/server.py 6"
+        async: 36000
         poll: 0
       - name: sleep
         command: "python3 /home/ec2-user/fl_project/iot/sleep.py"

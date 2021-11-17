@@ -110,7 +110,8 @@ class flClient(fl.client.NumPyClient):
         x_len=0
         for epoch in range(NUM_EPOCHS):
             print('epoch #{}'.format(epoch))
-            for i in range(NUM_CHUNKS_LIST[rnd][0],NUM_CHUNKS_LIST[rnd][1]):
+            #for i in range(NUM_CHUNKS_LIST[rnd][0],NUM_CHUNKS_LIST[rnd][1]):
+            for i in range(NUM_CHUNKS):
                 X, y = tss.get_chunk(i)
                 x_len+=len(X)
                 model.fit(x=X, y=y, batch_size=BATCH_SIZE)

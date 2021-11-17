@@ -11,8 +11,8 @@ import numpy as np
 import pickle
 
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
-NUM_ROUND=2
-NUM_EPOCHS = 5
+NUM_ROUND=1
+NUM_EPOCHS = 10
 
 #data load from boto3
 def divide_list(arr,n):
