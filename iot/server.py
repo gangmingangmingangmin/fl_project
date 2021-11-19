@@ -2,7 +2,7 @@
 
 import flwr as fl
 from typing import Callable, Dict, Optional, Tuple
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, mean_absolute_percentage_error, mean_squared_log_error
 import sys
 import tensorflow as tf
 from tensorflow.keras import layers
@@ -80,13 +80,21 @@ def get_eval_fn(model):
 
         y_act = df_val_ts['y'].values
         y_act = scaler.inverse_transform(y_act.reshape(-1, 1)).reshape(-1 ,)
-        loss = mean_squared_error(y_act, y_pred)
-        accuracy =r2_score(y_act, y_pred)
+        #mean_squared_error, r2_score, mean_absolute_error, mean_absolute_percentage_error, mean_squared_log_error
+        mse = mean_squared_error(y_act, y_pred)
+        r2 =r2_score(y_act, y_pred)
+        mae = mean_absolute_error(y_act, y_pred)
+        mape = mean_absolute_percentage_error(y_act, y_pred)
+        msle = mean_squared_log_error(y_act, y_pred)
         f = open('/home/ec2-user/result.txt','w')
-        f.write("mse : "+str(loss)+"\n")
-        f.write("r2 : "+str(accuracy))
+        f.write("mse : "+str(mse)+"\n")
+        f.write("rmse : "+str(np.sqrt(mse))+"\n")
+        f.write("r2 : "+str(r2)+"\n")
+        f.write("mae : "+str(mae)+"\n")
+        f.write("mape : "+str(mape)+"\n")
+        f.write("msle : "+str(msle))
         f.close()
-        return loss, {"r2_score":accuracy}
+        return mse, {"r2_score":r2}
 
     return evaluate
 
