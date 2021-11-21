@@ -12,7 +12,7 @@ import pickle
 
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 NUM_ROUND=1
-NUM_EPOCHS = 10
+NUM_EPOCHS = 1
 
 #data load from boto3
 def divide_list(arr,n):
@@ -81,18 +81,24 @@ def get_eval_fn(model):
         y_act = df_val_ts['y'].values
         y_act = scaler.inverse_transform(y_act.reshape(-1, 1)).reshape(-1 ,)
         #mean_squared_error, r2_score, mean_absolute_error, mean_absolute_percentage_error, mean_squared_log_error
-        mse = mean_squared_error(y_act, y_pred)
-        r2 =r2_score(y_act, y_pred)
-        mae = mean_absolute_error(y_act, y_pred)
-        mape = mean_absolute_percentage_error(y_act, y_pred)
-        msle = mean_squared_log_error(y_act, y_pred)
-        f = open('/home/ec2-user/result.txt','w')
-        f.write("mse : "+str(mse)+"\n")
-        f.write("rmse : "+str(np.sqrt(mse))+"\n")
-        f.write("r2 : "+str(r2)+"\n")
-        f.write("mae : "+str(mae)+"\n")
-        f.write("mape : "+str(mape)+"\n")
-        f.write("msle : "+str(msle))
+        f = open('/home/ec2-user/result.txt','r')
+        if len(f.read()) != 0:
+          mse = mean_squared_error(y_act, y_pred)
+          r2 =r2_score(y_act, y_pred)
+          mae = mean_absolute_error(y_act, y_pred)
+          mape = mean_absolute_percentage_error(y_act, y_pred)
+          msle = mean_squared_log_error(y_act, y_pred)
+          f = open('/home/ec2-user/result.txt','a')
+          f.write("mse : "+str(mse)+"\n")
+          f.write("rmse : "+str(np.sqrt(mse))+"\n")
+          f.write("r2 : "+str(r2)+"\n")
+          f.write("mae : "+str(mae)+"\n")
+          f.write("mape : "+str(mape)+"\n")
+          f.write("msle : "+str(msle))
+          
+        else:
+          mse=0
+          r2=0
         f.close()
         return mse, {"r2_score":r2}
 
@@ -118,11 +124,11 @@ strategy = fl.server.strategy.FedAvg(
     eval_fn = get_eval_fn(model)
 )
 
-import time
 #federated learning
 print('start')
-start_time = time.time()
+f = open('/home/ec2-user/result.txt','w')
+f.close()
 fl.server.start_server(config={"num_rounds": NUM_ROUND},strategy=strategy)
-end_time = time.time()
+
 
 print('processing time : '+str(end_time-start_time))
