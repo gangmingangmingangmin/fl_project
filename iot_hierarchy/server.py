@@ -11,7 +11,7 @@ import pickle
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 ssid = sys.argv[2][3]
 NUM_ROUND=1
-
+EPOCH = 1
 
 #data load from boto3
 def divide_list(arr,n):
@@ -41,6 +41,7 @@ for page in response_iterator:
 # 데이터 수를 노드 수에 맞추기 위한 코드
 file_n = 108 #고정
 
+
 if file_n % MIN_AVAILABLE_CLIENTS > 0:
     DIV = file_n // MIN_AVAILABLE_CLIENTS +1
 else:
@@ -50,7 +51,7 @@ print(file_n,DIV)
 
 def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
     def fit_config(rnd:int) -> Dict[str,str]:
-        config = {"epoch" : 1, "round":rnd, "file_n":file_n, "div":DIV, "n_round":NUM_ROUND,"n_clients": MIN_AVAILABLE_CLIENTS} 
+        config = {"epoch" : EPOCH, "round":rnd, "file_n":file_n, "div":DIV, "n_round":NUM_ROUND,"n_clients": MIN_AVAILABLE_CLIENTS} 
         return config
     return fit_config
 
@@ -59,6 +60,7 @@ def get_eval_fn(model):
     
     # The `evaluate` function will be called after every round
     def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
+        
         model.set_weights(weights)  # Update model with the latest parameters
         with open('parameters'+ssid+'.pickle','wb') as f:
             pickle.dump(weights,f)
@@ -90,8 +92,7 @@ strategy = fl.server.strategy.FedAvg(
 
 import time
 #federated learning
-start_time = time.time()
 fl.server.start_server(config={"num_rounds": NUM_ROUND},strategy=strategy)
-end_time = time.time()
+
 
 print('processing time : '+str(end_time-start_time))

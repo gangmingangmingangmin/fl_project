@@ -65,10 +65,18 @@ y_pred = scaler.inverse_transform(y_pred.reshape(-1, 1)).reshape(-1 ,)
 
 y_act = df_val_ts['y'].values
 y_act = scaler.inverse_transform(y_act.reshape(-1, 1)).reshape(-1 ,)
-loss = mean_squared_error(y_act, y_pred)
-accuracy =r2_score(y_act, y_pred)
+
+mse = mean_squared_error(y_act, y_pred)
+r2 =r2_score(y_act, y_pred)
+mae = mean_absolute_error(y_act, y_pred)
+mape = mean_absolute_percentage_error(y_act, y_pred)
+msle = mean_squared_log_error(y_act, y_pred)
 f = open('/home/ec2-user/result.txt','w')
-f.write("mse : "+str(loss)+"\n")
-f.write("r2 : "+str(accuracy))
+f.write("mse : "+str(mse)+"\n")
+f.write("rmse : "+str(np.sqrt(mse))+"\n")
+f.write("r2 : "+str(r2)+"\n")
+f.write("mae : "+str(mae)+"\n")
+f.write("mape : "+str(mape)+"\n")
+f.write("msle : "+str(msle))
 f.close()
 
