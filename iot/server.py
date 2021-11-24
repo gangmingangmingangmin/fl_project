@@ -12,7 +12,7 @@ import pickle
 
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 NUM_ROUND=1
-NUM_EPOCHS = 1
+NUM_EPOCHS = 10
 
 #data load from boto3
 def divide_list(arr,n):
@@ -27,7 +27,7 @@ response_iterator = paginator.paginate(Bucket='federatedlearning2')
 file_n =0
 for page in response_iterator:
     for content in page['Contents']:
-        if content['Key'][-4:]=='.pkl':
+        if content['Key'][-4:]=='.pkl' and content['Key'][0] == 't':
             file_n+=1
 
 #read file from local
@@ -83,6 +83,7 @@ def get_eval_fn(model):
         #mean_squared_error, r2_score, mean_absolute_error, mean_absolute_percentage_error, mean_squared_log_error
         f = open('/home/ec2-user/result.txt','r')
         if len(f.read()) != 0:
+          f.close()
           mse = mean_squared_error(y_act, y_pred)
           r2 =r2_score(y_act, y_pred)
           mae = mean_absolute_error(y_act, y_pred)
@@ -97,9 +98,13 @@ def get_eval_fn(model):
           f.write("msle : "+str(msle))
           
         else:
+          f.close()
+          f = open('/home/ec2-user/result.txt','a')
+          f.write("start")
+          f.close()
           mse=0
           r2=0
-        f.close()
+        
         return mse, {"r2_score":r2}
 
     return evaluate

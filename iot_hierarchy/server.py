@@ -11,7 +11,7 @@ import pickle
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 ssid = sys.argv[2][3]
 NUM_ROUND=1
-EPOCH = 1
+EPOCH = 10
 
 #data load from boto3
 def divide_list(arr,n):
@@ -26,7 +26,7 @@ response_iterator = paginator.paginate(Bucket='federatedlearning2')
 file_n =0
 for page in response_iterator:
     for content in page['Contents']:
-        if content['Key'][-4:]=='.pkl':
+        if content['Key'][-4:]=='.pkl'and content['Key'][0] == 't':
             file_n+=1
 
 #read file from local

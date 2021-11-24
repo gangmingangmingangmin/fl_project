@@ -4,7 +4,8 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 from tensorflow.keras import layers
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, mean_absolute_percentage_error, mean_squared_log_error
+
 
 client = boto3.client('s3')
 paginator = client.get_paginator('list_objects_v2')
