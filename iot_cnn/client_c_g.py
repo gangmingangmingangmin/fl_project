@@ -3,9 +3,10 @@
 import flwr as fl
 import math
 import tensorflow as tf
-from tensorflow import keras
 from tensorflow.keras import layers
-from tensorflow.keras.utils import Sequence
+import tensorflow.keras
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, Flatten,Conv2D, MaxPooling2D
 from datetime import timedelta
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
@@ -51,26 +52,37 @@ class TimeSeriesLoader:
         objd=obj.get()['Body'].read()
         #python 2 버전에서 dump한 파일이기때문에 encoding, python 3 버전은 bytes 사용
         (X_train,y_train),(X_test,y_test) = pickle.loads(objd,encoding = 'bytes')
-        
+        X_train = X_train.reshape(X_train.shape[0],img_row,img_col,1)
+        X_train = X_train.astype('float32')/255
+        y_train = tf.keras.utils.to_categorical(y_train,10)
+        self.X_train = X_train
+        self.y_train = y_train
+        self.X_val = X_train[50000:]
+        self.y_val = y_train[50000:]
     def num_chunks(self):
         return self.num_files
 
     def shuffle_chunks(self):
         np.random.shuffle(self.files_indices)
 
-    def get_chunk(self, idx):
+    def get_chunk(self):
         # model.fit does train the model incrementally. ie. Can call m
-        assert (idx >= 0) and (idx < self.num_files)
+        #assert (idx >= 0) and (idx < self.num_files)
 
         #data load from s3
-        ind = self.files_indices[idx]+self.start_index # data index
+        ind = self.num_files+self.start_index # data index
         
-        X = X_train[ind]
-        y = y_train[ind]
+        X = self.X_train[self.start_index:ind]
+        y = self.y_train[self.start_index:ind]
 
         return X,y
 
-# Load and compile Keras model
+
+#model for cnn
+img_row = 28
+img_col = 28
+input_shape = (img_row,img_col,1)
+num_classes = 10
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(5, 5), strides=(1, 1), padding='same',
                  activation='relu',
@@ -109,11 +121,15 @@ class flClient(fl.client.NumPyClient):
         for epoch in range(NUM_EPOCHS):
             print('epoch #{}'.format(epoch))
             #for i in range(NUM_CHUNKS_LIST[rnd][0],NUM_CHUNKS_LIST[rnd][1]):
-            for i in range(NUM_CHUNKS):
-                X, y = tss.get_chunk(i)
-                x_len+=len(X)
-                model.fit(x=X, y=y, batch_size=BATCH_SIZE)
-        
+            #for i in range(NUM_CHUNKS):
+            X, y = tss.get_chunk()
+            x_len+=len(X)
+            print(X.shape)
+            print(tss.X_val.shape)
+            print(y.shape)
+            print('@@@@@@@@@@@@@@@@@@@')
+            model.fit(x=X, y=y, batch_size=BATCH_SIZE, validation_data = (tss.X_val, tss.y_val))
+    
         return model.get_weights(), x_len, {}
     def evaluate(self, parameters, config):
       return 0,0,{"no evaluation":0}

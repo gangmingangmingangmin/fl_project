@@ -19,7 +19,7 @@ np.random.seed(10)
 
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 NUM_ROUND=1
-NUM_EPOCHS = 10
+NUM_EPOCHS = 20
 
 #data load from boto3
 def divide_list(arr,n):
@@ -60,16 +60,18 @@ def get_eval_fn(model):
         objd=obj.get()['Body'].read()
         #python 2 버전에서 dump한 파일이기때문에 encoding, python 3 버전은 bytes 사용
         (X_train,y_train),(X_test,y_test) = pickle.loads(objd,encoding = 'bytes') 
-        x_test = x_test.reshape(x_Test.shape[0],img_row,img_col,1)
-        x_test = x_test.astype('folat32')/255
-
+        X_test = X_test.reshape(X_test.shape[0],img_row,img_col,1)
+        X_test = X_test.astype('float32')/255
+        y_test = tf.keras.utils.to_categorical(y_test,10)
+        print(X_test.shape)
         model.set_weights(weights)  # Update model with the latest parameters
         #x_test, y_test
         predict = model.predict(X_test)
         y_pred = np.argmax(predict,axis=1)
+        y_label = np.argmax(y_test,axis=1)
         #classification_report, confusion_matrix
-        cr = classification_report(y_test,y_pred)
-        cm = confusion_matrix(y_test,y_pred)
+        cr = classification_report(y_label,y_pred,digits = 4)
+        cm = confusion_matrix(y_label,y_pred)
         f = open('/home/ec2-user/result.txt','w')
         f.write("classification_report : "+str(cr)+"\n")
         f.write("confusion_matrix : "+str(cm))
@@ -115,4 +117,3 @@ import time
 #federated learning
 fl.server.start_server(config={"num_rounds": NUM_ROUND},strategy=strategy)
 
-print('processing time : '+str(end_time-start_time))
