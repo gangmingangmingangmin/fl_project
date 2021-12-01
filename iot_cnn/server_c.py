@@ -19,7 +19,7 @@ np.random.seed(10)
 
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 NUM_ROUND=1
-NUM_EPOCHS = 20
+NUM_EPOCHS = 10
 
 #data load from boto3
 def divide_list(arr,n):
@@ -63,7 +63,7 @@ def get_eval_fn(model):
         X_test = X_test.reshape(X_test.shape[0],img_row,img_col,1)
         X_test = X_test.astype('float32')/255
         y_test = tf.keras.utils.to_categorical(y_test,10)
-        print(X_test.shape)
+        #print(X_test.shape)
         model.set_weights(weights)  # Update model with the latest parameters
         #x_test, y_test
         predict = model.predict(X_test)
