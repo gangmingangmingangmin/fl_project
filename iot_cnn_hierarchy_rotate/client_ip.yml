@@ -5,6 +5,6 @@
     tasks:
       - name: Upload python file
         copy:
-          src: ./client_c.py
+          src: ./client_c_r.py
           dest: /home/ec2-user
           mode: 0755

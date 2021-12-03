@@ -56,10 +56,16 @@ def get_eval_fn(model):
         bucket = 'federatedlearning2'
         s3 = boto3.resource('s3',region_name = 'ap-northeast-2')
 
-        obj = s3.Object(bucket,'mnist/mnist.pkl')
-        objd=obj.get()['Body'].read()
+        
         #python 2 버전에서 dump한 파일이기때문에 encoding, python 3 버전은 bytes 사용
-        (X_train,y_train),(X_test,y_test) = pickle.loads(objd,encoding = 'bytes') 
+        obj = s3.Object(bucket,'mnist/X_test.pickle')
+        objd=obj.get()['Body'].read()
+        X_test = pickle.loads(objd,encoding='bytes')
+
+        obj = s3.Object(bucket,'mnist/y_test.pickle')
+        objd=obj.get()['Body'].read()
+        y_test = pickle.loads(objd,encoding='bytes')
+        
         X_test = X_test.reshape(X_test.shape[0],img_row,img_col,1)
         X_test = X_test.astype('float32')/255
         y_test = tf.keras.utils.to_categorical(y_test,10)
@@ -77,7 +83,6 @@ def get_eval_fn(model):
         f.write("confusion_matrix : "+str(cm))
         f.close()
         #할당제거
-        del X_train,y_train,X_test,y_test
         return 0, {"err":0}
 
     return evaluate

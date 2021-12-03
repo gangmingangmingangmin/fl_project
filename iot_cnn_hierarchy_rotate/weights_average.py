@@ -63,7 +63,6 @@ model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accur
 model.set_weights(avg_weight)  # Update model with the latest parameters
 
 #데이터 로드
-
 #python 2 버전에서 dump한 파일이기때문에 encoding, python 3 버전은 bytes 사용
 obj = s3.Object(bucket,'mnist/X_test.pickle')
 objd=obj.get()['Body'].read()
