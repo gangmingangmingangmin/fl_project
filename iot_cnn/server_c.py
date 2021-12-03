@@ -18,8 +18,8 @@ from mlxtend.data import loadlocal_mnist
 np.random.seed(10)
 
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
-NUM_ROUND=1
-NUM_EPOCHS = 10
+NUM_ROUND=10
+NUM_EPOCHS = 1
 
 #data load from boto3
 def divide_list(arr,n):
@@ -76,6 +76,8 @@ def get_eval_fn(model):
         f.write("classification_report : "+str(cr)+"\n")
         f.write("confusion_matrix : "+str(cm))
         f.close()
+        #할당제거
+        del X_train,y_train,X_test,y_test
         return 0, {"err":0}
 
     return evaluate
