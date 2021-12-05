@@ -18,7 +18,7 @@ from mlxtend.data import loadlocal_mnist
 np.random.seed(10)
 
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
-NUM_ROUND=10
+NUM_ROUND=1
 NUM_EPOCHS = 1
 
 #data load from boto3
@@ -38,6 +38,9 @@ if file_n % MIN_AVAILABLE_CLIENTS > 0:
 else:
     DIV = file_n//MIN_AVAILABLE_CLIENTS
 print(file_n,DIV)
+
+#test code
+#DIV = file_n//9
 
 #fit strategy
 def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
@@ -112,14 +115,14 @@ model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accur
 
 
 strategy = fl.server.strategy.FedAvg(
-    fraction_fit=1,  # Sample 10% of available clients for the next round
+    fraction_fit=MIN_AVAILABLE_CLIENTS,  # Sample 10% of available clients for the next round
     min_fit_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients to be sampled for the next round
     min_available_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients that need to be connected to the server before a training round can start
     min_eval_clients=MIN_AVAILABLE_CLIENTS, # default = 2
     on_fit_config_fn=get_on_fit_config_fn(),
     eval_fn = get_eval_fn(model)
 )
-
+print('clients:'+str(MIN_AVAILABLE_CLIENTS))
 import time
 #federated learning
 fl.server.start_server(config={"num_rounds": NUM_ROUND},strategy=strategy)

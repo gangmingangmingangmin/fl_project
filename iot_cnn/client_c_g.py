@@ -131,7 +131,10 @@ class flClient(fl.client.NumPyClient):
             X, y = tss.get_chunk()
             x_len+=len(X)
             model.fit(x=X, y=y, batch_size=BATCH_SIZE, validation_data = (tss.X_val, tss.y_val))
-    
+
+        with open('/home/ec2-user/temp/'+'parameters'+str(cid)+'.pkl','wb') as f:
+          pickle.dump(model.get_weights(),f)
+
         return model.get_weights(), x_len, {}
     def evaluate(self, parameters, config):
       return 0,0,{"no evaluation":0}
