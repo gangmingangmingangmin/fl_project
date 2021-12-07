@@ -18,7 +18,7 @@ np.random.seed(10)
 
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 ssid = sys.argv[2][3] # sub server id
-NUM_ROUND=10
+NUM_ROUND=1
 NUM_EPOCHS = 1
 
 #data load from boto3

@@ -18,7 +18,7 @@ from mlxtend.data import loadlocal_mnist
 np.random.seed(10)
 
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
-NUM_ROUND=1
+NUM_ROUND=100
 NUM_EPOCHS = 1
 
 #data load from boto3
@@ -115,7 +115,7 @@ model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accur
 
 
 strategy = fl.server.strategy.FedAvg(
-    fraction_fit=MIN_AVAILABLE_CLIENTS,  # Sample 10% of available clients for the next round
+    fraction_fit=1,  # Sample 10% of available clients for the next round
     min_fit_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients to be sampled for the next round
     min_available_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients that need to be connected to the server before a training round can start
     min_eval_clients=MIN_AVAILABLE_CLIENTS, # default = 2

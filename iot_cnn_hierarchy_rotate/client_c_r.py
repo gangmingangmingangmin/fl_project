@@ -106,15 +106,17 @@ model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accur
 
 # Define Flower client
 class flClient(fl.client.NumPyClient):
+    def __init__(self,cid):
+        self.cid = cid
     def get_parameters(self):
         return model.get_weights()
 
     def fit(self,parameters,config):
         # round 찾기
         rnd = config['round']-1
-        cid +=1
-        if cid ==9:
-          cid = 0
+        self.cid +=rnd
+        if self.cid >= 9:
+          self.cid %= 9
 
         tss=TimeSeriesLoader(config['file_n'],config['div'],config['n_clients'])
         BATCH_SIZE = 128
@@ -135,39 +137,10 @@ class flClient(fl.client.NumPyClient):
             #for i in range(NUM_CHUNKS):
             X, y = tss.get_chunk()
             x_len+=len(X)
-            print(X.shape)
-            print(tss.X_val.shape)
-            print(y.shape)
-            print('@@@@@@@@@@@@@@@@@@@')
             model.fit(x=X, y=y, batch_size=BATCH_SIZE, validation_data = (tss.X_val, tss.y_val))
     
         return model.get_weights(), x_len, {}
     def evaluate(self, parameters, config):
       return 0,0,{"no evaluation":0}
-    '''
-    # client side evaluation
-    def evaluate(self, parameters, config):
-        # testdata
-        df_val_ts = pd.read_pickle('/home/ec2-user/ts_file0.pkl')
-        features = df_val_ts.
-        drop('y', axis=1).values
-        features_arr = np.array(features)
-
-        # reshape for input into LSTM. Batch major format.
-        num_records = len(df_val_ts.index)
-        features_batchmajor = features_arr.reshape(num_records, -1, 1)
-
-        model.set_weights(parameters)
-        # Scaled to work with Neural networks.
-        with open('/home/ec2-user/scaler_train.pickle','rb') as f:
-            scaler = pickle.load(f)
-
-        y_pred = model.predict(features_batchmajor).reshape(-1, )
-        y_pred = scaler.inverse_transform(y_pred.reshape(-1, 1)).reshape(-1 ,)
-
-        y_act = df_val_ts['y'].values
-        y_act = scaler.inverse_transform(y_act.reshape(-1, 1)).reshape(-1 ,)
-        return mean_squared_error(y_act, y_pred), len(features_batchmajor),  {"MSE": mean_squared_error(y_act, y_pred)}
-    '''
 # Start Flower client
-fl.client.start_numpy_client(server_address="172.31.18.242:8080", client=flClient())
+fl.client.start_numpy_client(server_address="172.31.17.97:8080", client=flClient(cid))
