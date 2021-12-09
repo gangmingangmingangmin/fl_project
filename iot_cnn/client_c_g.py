@@ -123,19 +123,18 @@ class flClient(fl.client.NumPyClient):
             NUM_CHUNKS_LIST.append([index,index+r])
             index = index+r
         NUM_CHUNKS_LIST[-1][-1] = NUM_CHUNKS
-        x_len=0
+        
         for epoch in range(NUM_EPOCHS):
             print('epoch #{}'.format(epoch))
             #for i in range(NUM_CHUNKS_LIST[rnd][0],NUM_CHUNKS_LIST[rnd][1]):
             #for i in range(NUM_CHUNKS):
             X, y = tss.get_chunk()
-            x_len+=len(X)
             model.fit(x=X, y=y, batch_size=BATCH_SIZE, validation_data = (tss.X_val, tss.y_val))
         '''
         with open('/home/ec2-user/temp/'+'parameters'+str(cid)+'.pkl','wb') as f:
           pickle.dump(model.get_weights(),f)
         '''
-        return model.get_weights(), x_len, {}
+        return model.get_weights(), len(X), {}
     def evaluate(self, parameters, config):
       return 0,0,{"no evaluation":0}
 # Start Flower client
