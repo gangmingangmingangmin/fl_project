@@ -4,7 +4,7 @@ import flwr as fl
 import warnings
 warnings.simplefilter(action='ignore',category = FutureWarning)
 from typing import Callable, Dict, Optional, Tuple
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix,log_loss
 import sys
 import tensorflow as tf
 from tensorflow.keras import layers
@@ -14,11 +14,11 @@ from tensorflow.keras.layers import Dense, Dropout, Flatten,Conv2D, MaxPooling2D
 import pandas as pd
 import numpy as np
 import pickle
-from mlxtend.data import loadlocal_mnist
+from sklearn.linear_model import LogisticRegression
 np.random.seed(10)
 
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
-NUM_ROUND=100
+NUM_ROUND=5
 NUM_EPOCHS = 1
 
 #data load from boto3
@@ -40,7 +40,7 @@ else:
 print(file_n,DIV)
 
 #test code
-#DIV = file_n//9
+DIV = file_n//10
 
 #fit strategy
 def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
@@ -50,34 +50,37 @@ def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
     return fit_config
 #server side evaluation
 def get_eval_fn(model):
+    #read file from s3
+    import boto3
+    client = boto3.client('s3')
+    bucket = 'federatedlearning2'
+    s3 = boto3.resource('s3',region_name = 'ap-northeast-2')
+    #python 2 버전에서 dump한 파일이기때문에 encoding, python 3 버전은 bytes 사용
+    obj = s3.Object(bucket,'mnist/X_test.pickle')
+    objd=obj.get()['Body'].read()
+    X_test = pickle.loads(objd,encoding='bytes')
+
+    obj = s3.Object(bucket,'mnist/y_test.pickle')
+    objd=obj.get()['Body'].read()
+    y_test = pickle.loads(objd,encoding='bytes')
     
+    X_test = X_test.reshape(X_test.shape[0],img_row,img_col,1)
+    X_test = X_test.astype('float32')/255
+    y_test = tf.keras.utils.to_categorical(y_test,10)
     # The `evaluate` function will be called after every round
     def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
-        #read file from s3
-        import boto3
-        client = boto3.client('s3')
-        bucket = 'federatedlearning2'
-        s3 = boto3.resource('s3',region_name = 'ap-northeast-2')
-
         
-        #python 2 버전에서 dump한 파일이기때문에 encoding, python 3 버전은 bytes 사용
-        obj = s3.Object(bucket,'mnist/X_test.pickle')
-        objd=obj.get()['Body'].read()
-        X_test = pickle.loads(objd,encoding='bytes')
-
-        obj = s3.Object(bucket,'mnist/y_test.pickle')
-        objd=obj.get()['Body'].read()
-        y_test = pickle.loads(objd,encoding='bytes')
-        
-        X_test = X_test.reshape(X_test.shape[0],img_row,img_col,1)
-        X_test = X_test.astype('float32')/255
-        y_test = tf.keras.utils.to_categorical(y_test,10)
         #print(X_test.shape)
         model.set_weights(weights)  # Update model with the latest parameters
         #x_test, y_test
         predict = model.predict(X_test)
         y_pred = np.argmax(predict,axis=1)
         y_label = np.argmax(y_test,axis=1)
+        #predict acc
+        acc = model.evaluate(X_test,y_test,verbose=0)
+        f = open('/home/ec2-user/acc.txt','a')
+        f.write('acc : '+str(acc)+"\n")
+        f.close()
         #classification_report, confusion_matrix
         cr = classification_report(y_label,y_pred,digits = 4)
         cm = confusion_matrix(y_label,y_pred)
@@ -113,12 +116,22 @@ model.add(Dropout(0.5))
 model.add(Dense(num_classes, activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
+#logistic model
+#model = LogisticRegression()
+#set initial parameters
+'''
+n_classes = 10  # MNIST has 10 classes
+n_features = 784  # Number of features in dataset
+model.classes_ = np.array([i for i in range(10)])
 
+model.coef_ = np.zeros((n_classes, n_features))
+model.intercept_ = np.zeros((n_classes,))
+'''
 strategy = fl.server.strategy.FedAvg(
     fraction_fit=1,  # Sample 10% of available clients for the next round
-    min_fit_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients to be sampled for the next round
+    #min_fit_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients to be sampled for the next round
     min_available_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients that need to be connected to the server before a training round can start
-    min_eval_clients=MIN_AVAILABLE_CLIENTS, # default = 2
+    #min_eval_clients=MIN_AVAILABLE_CLIENTS, # default = 2
     on_fit_config_fn=get_on_fit_config_fn(),
     eval_fn = get_eval_fn(model)
 )

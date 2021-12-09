@@ -9,7 +9,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Flatten,Conv2D, MaxPooling2D
 from datetime import timedelta
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import mean_squared_error
+from sklearn.linear_model import LogisticRegression
 import pickle
 import numpy as np
 import pandas as pd
@@ -88,6 +88,8 @@ img_row = 28
 img_col = 28
 input_shape = (img_row,img_col,1)
 num_classes = 10
+
+#model
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(5, 5), strides=(1, 1), padding='same',
                  activation='relu',
@@ -102,14 +104,31 @@ model.add(Dropout(0.5))
 model.add(Dense(num_classes, activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
+'''
+# Create LogisticRegression Model
+model = LogisticRegression(
+    penalty="l2",
+    max_iter=1,  # local epoch
+    warm_start=True,  # prevent refreshing weights when fitting
+)
+'''
+'''
+#set initial parameters
+n_classes = 10  # MNIST has 10 classes
+n_features = 784  # Number of features in dataset
+model.classes_ = np.array([i for i in range(10)])
 
-
+model.coef_ = np.zeros((n_classes, n_features))
+model.intercept_ = np.zeros((n_classes,))
+'''
 # Define Flower client
 class flClient(fl.client.NumPyClient):
     def get_parameters(self):
+        #return (model.coef_,model.intercept_)
         return model.get_weights()
 
     def fit(self,parameters,config):
+        model.set_weights(parameters)
         tss=TimeSeriesLoader(config['file_n'],config['div'],config['n_clients'])
         BATCH_SIZE = 128
         NUM_EPOCHS = config['epoch']
@@ -130,10 +149,8 @@ class flClient(fl.client.NumPyClient):
             #for i in range(NUM_CHUNKS):
             X, y = tss.get_chunk()
             model.fit(x=X, y=y, batch_size=BATCH_SIZE, validation_data = (tss.X_val, tss.y_val))
-        '''
-        with open('/home/ec2-user/temp/'+'parameters'+str(cid)+'.pkl','wb') as f:
-          pickle.dump(model.get_weights(),f)
-        '''
+        
+        
         return model.get_weights(), len(X), {}
     def evaluate(self, parameters, config):
       return 0,0,{"no evaluation":0}
