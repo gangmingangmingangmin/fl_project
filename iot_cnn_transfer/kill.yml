@@ -1,0 +1,8 @@
+# kill.yml
+
+---
+  - hosts: iotmasterservers,iotsubmasterservers,iotslaveservers*
+    tasks:
+      - name: kill process
+        command: "pkill -9 -f python"
+        

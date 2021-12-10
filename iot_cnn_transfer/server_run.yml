@@ -1,0 +1,21 @@
+# upload_run.yml
+
+---
+  - hosts: iotmasterservers
+    tasks:
+      - name: run server
+        command: "python3 /home/ec2-user/fl_project/iot_cnn/server_c.py 27"
+        async: 36000
+        poll: 0
+      - name: sleep
+        command: "python3 /home/ec2-user/fl_project/iot_cnn/sleep.py"
+  - hosts: iotslaveservers*
+    tasks:
+      - name: Upload client file
+        copy:
+          src: ./client_c_g.py
+          dest: /home/ec2-user
+          mode: 0755
+      - name: run client
+        command: "python3 /home/ec2-user/client_c_g.py {{ inventory_hostname }}"
+  
