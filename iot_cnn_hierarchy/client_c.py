@@ -110,6 +110,7 @@ class flClient(fl.client.NumPyClient):
         return model.get_weights()
 
     def fit(self,parameters,config):
+        model.set_weights(parameters)
         tss=TimeSeriesLoader(config['file_n'],config['div'],config['n_clients'])
         BATCH_SIZE = 128
         NUM_EPOCHS = config['epoch']
@@ -122,17 +123,15 @@ class flClient(fl.client.NumPyClient):
             NUM_CHUNKS_LIST.append([index,index+r])
             index = index+r
         NUM_CHUNKS_LIST[-1][-1] = NUM_CHUNKS
-        x_len=0
+
         for epoch in range(NUM_EPOCHS):
             print('epoch #{}'.format(epoch))
             #for i in range(NUM_CHUNKS_LIST[rnd][0],NUM_CHUNKS_LIST[rnd][1]):
             #for i in range(NUM_CHUNKS):
             X, y = tss.get_chunk()
-            x_len+=len(X)
             model.fit(x=X, y=y, batch_size=BATCH_SIZE, validation_data = (tss.X_val, tss.y_val))
-    
-        return model.get_weights(), x_len, {}
+        return model.get_weights(), len(X), {}
     def evaluate(self, parameters, config):
       return 0,0,{"no evaluation":0}
 # Start Flower client
-fl.client.start_numpy_client(server_address="172.31.18.242:8080", client=flClient())
+fl.client.start_numpy_client(server_address="172.31.17.97:8080", client=flClient())
