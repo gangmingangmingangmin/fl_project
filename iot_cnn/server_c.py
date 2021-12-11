@@ -39,8 +39,6 @@ else:
     DIV = file_n//MIN_AVAILABLE_CLIENTS
 print(file_n,DIV)
 
-#test code
-DIV = file_n//10
 
 #fit strategy
 def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
@@ -76,11 +74,6 @@ def get_eval_fn(model):
         predict = model.predict(X_test)
         y_pred = np.argmax(predict,axis=1)
         y_label = np.argmax(y_test,axis=1)
-        #predict acc
-        acc = model.evaluate(X_test,y_test,verbose=0)
-        f = open('/home/ec2-user/acc.txt','a')
-        f.write('acc : '+str(acc)+"\n")
-        f.close()
         #classification_report, confusion_matrix
         cr = classification_report(y_label,y_pred,digits = 4)
         cm = confusion_matrix(y_label,y_pred)
@@ -88,7 +81,10 @@ def get_eval_fn(model):
         f.write("classification_report : "+str(cr)+"\n")
         f.write("confusion_matrix : "+str(cm))
         f.close()
-        #할당제거
+        '''
+        with open('/home/ec2-user/fl_project_data/full.pkl','wb') as f:
+          pickle.dump(weights,f)
+        '''
         return 0, {"err":0}
 
     return evaluate
@@ -129,7 +125,7 @@ model.intercept_ = np.zeros((n_classes,))
 '''
 strategy = fl.server.strategy.FedAvg(
     fraction_fit=1,  # Sample 10% of available clients for the next round
-    #min_fit_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients to be sampled for the next round
+    min_fit_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients to be sampled for the next round
     min_available_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients that need to be connected to the server before a training round can start
     #min_eval_clients=MIN_AVAILABLE_CLIENTS, # default = 2
     on_fit_config_fn=get_on_fit_config_fn(),

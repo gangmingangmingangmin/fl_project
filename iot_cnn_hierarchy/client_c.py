@@ -35,7 +35,7 @@ else:
 class TimeSeriesLoader:
     def __init__(self,file_n,div,n_clients):
         if n_clients>9:
-          self.start_index=gid*div+cid*5555
+          self.start_index=gid*div+cid*555
         else:
           self.start_index=cid*div
         #min_n = min(file_n,self.start_index+div)# 파일 크기 안넘도록
@@ -62,8 +62,8 @@ class TimeSeriesLoader:
         y_train = tf.keras.utils.to_categorical(y_train,10)
         self.X_train = X_train
         self.y_train = y_train
-        self.X_val = X_train[50000:]
-        self.y_val = y_train[50000:]
+        self.X_val = X_train[50000:51000]
+        self.y_val = y_train[50000:51000]
     def num_chunks(self):
         return self.num_files
 

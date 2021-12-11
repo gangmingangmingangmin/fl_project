@@ -68,8 +68,9 @@ def get_eval_fn(model):
     # The `evaluate` function will be called after every round
     def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
         
-        #print(X_test.shape)
-        model.set_weights(weights)  # Update model with the latest parameters
+        new_weights = model.get_weights()[:4] + weights
+
+        model.set_weights(new_weights)  # Update model with the latest parameters
         #x_test, y_test
         predict = model.predict(X_test)
         y_pred = np.argmax(predict,axis=1)
@@ -109,17 +110,10 @@ model.add(Dropout(0.5))
 model.add(Dense(num_classes, activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-#logistic model
-#model = LogisticRegression()
-#set initial parameters
-'''
-n_classes = 10  # MNIST has 10 classes
-n_features = 784  # Number of features in dataset
-model.classes_ = np.array([i for i in range(10)])
+with open('/home/ec2-user/fl_project/data/full.pkl','rb') as f:
+  w = pickle.load(f)
+model.set_weights(w)
 
-model.coef_ = np.zeros((n_classes, n_features))
-model.intercept_ = np.zeros((n_classes,))
-'''
 strategy = fl.server.strategy.FedAvg(
     fraction_fit=1,  # Sample 10% of available clients for the next round
     min_fit_clients=MIN_AVAILABLE_CLIENTS,  # Minimum number of clients to be sampled for the next round

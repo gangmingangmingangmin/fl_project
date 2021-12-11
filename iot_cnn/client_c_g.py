@@ -104,23 +104,6 @@ model.add(Dropout(0.5))
 model.add(Dense(num_classes, activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-'''
-# Create LogisticRegression Model
-model = LogisticRegression(
-    penalty="l2",
-    max_iter=1,  # local epoch
-    warm_start=True,  # prevent refreshing weights when fitting
-)
-'''
-'''
-#set initial parameters
-n_classes = 10  # MNIST has 10 classes
-n_features = 784  # Number of features in dataset
-model.classes_ = np.array([i for i in range(10)])
-
-model.coef_ = np.zeros((n_classes, n_features))
-model.intercept_ = np.zeros((n_classes,))
-'''
 # Define Flower client
 class flClient(fl.client.NumPyClient):
     def get_parameters(self):
@@ -149,8 +132,6 @@ class flClient(fl.client.NumPyClient):
             #for i in range(NUM_CHUNKS):
             X, y = tss.get_chunk()
             model.fit(x=X, y=y, batch_size=BATCH_SIZE, validation_data = (tss.X_val, tss.y_val))
-        
-        
         return model.get_weights(), len(X), {}
     def evaluate(self, parameters, config):
       return 0,0,{"no evaluation":0}
