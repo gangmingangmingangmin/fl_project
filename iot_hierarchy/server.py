@@ -10,8 +10,8 @@ import numpy as np
 import pickle
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 ssid = sys.argv[2][3]
-NUM_ROUND=1
-EPOCH = 10
+NUM_ROUND=5
+EPOCH = 1
 
 #data load from boto3
 def divide_list(arr,n):
@@ -29,17 +29,8 @@ for page in response_iterator:
         if content['Key'][-4:]=='.pkl'and content['Key'][0] == 't':
             file_n+=1
 
-#read file from local
-#import os
-#path = '/home/ec2-user/data/ts_data'
-#file_list=os.listdir(path)
-#file_n=0
-#for content in file_list:
-#    if content[-4:]=='.pkl':
-#        file_n+=1
 
-# 데이터 수를 노드 수에 맞추기 위한 코드
-file_n = 108 #고정
+file_n = 54 #고정
 
 
 if file_n % MIN_AVAILABLE_CLIENTS > 0:
@@ -94,5 +85,3 @@ import time
 #federated learning
 fl.server.start_server(config={"num_rounds": NUM_ROUND},strategy=strategy)
 
-
-print('processing time : '+str(end_time-start_time))

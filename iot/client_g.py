@@ -34,7 +34,7 @@ else:
 class TimeSeriesLoader:
     def __init__(self,file_n,div,n_clients):
         if n_clients>9:
-          self.start_index=gid*div+cid*12
+          self.start_index=gid*div+cid*6
         else:
           self.start_index=cid*div
         #min_n = min(file_n,self.start_index+div)# 파일 크기 안넘도록
@@ -62,11 +62,6 @@ class TimeSeriesLoader:
         objd = obj.get()['Body'].read()
         df_ts = pickle.loads(objd)
 
-        #data load from local
-        '''
-        with open('/home/ec2-user/data/ts_data/ts_file'+str(ind)+'.pkl','rb') as f:
-            df_ts = pickle.load(f)
-        '''
         num_records = len(df_ts.index)
 
         features = df_ts.drop('y', axis=1).values
@@ -94,7 +89,7 @@ class flClient(fl.client.NumPyClient):
         return model.get_weights()
 
     def fit(self,parameters,config):
-        print(config)
+        model.set_weights(parameters)
         tss=TimeSeriesLoader(config['file_n'],config['div'],config['n_clients'])
         BATCH_SIZE = 128
         NUM_EPOCHS = config['epoch']
@@ -119,30 +114,5 @@ class flClient(fl.client.NumPyClient):
         return model.get_weights(), x_len, {}
     def evaluate(self, parameters, config):
       return 0,0,{"no evaluation":0}
-    '''
-    # client side evaluation
-    def evaluate(self, parameters, config):
-        # testdata
-        df_val_ts = pd.read_pickle('/home/ec2-user/ts_file0.pkl')
-        features = df_val_ts.
-        drop('y', axis=1).values
-        features_arr = np.array(features)
-
-        # reshape for input into LSTM. Batch major format.
-        num_records = len(df_val_ts.index)
-        features_batchmajor = features_arr.reshape(num_records, -1, 1)
-
-        model.set_weights(parameters)
-        # Scaled to work with Neural networks.
-        with open('/home/ec2-user/scaler_train.pickle','rb') as f:
-            scaler = pickle.load(f)
-
-        y_pred = model.predict(features_batchmajor).reshape(-1, )
-        y_pred = scaler.inverse_transform(y_pred.reshape(-1, 1)).reshape(-1 ,)
-
-        y_act = df_val_ts['y'].values
-        y_act = scaler.inverse_transform(y_act.reshape(-1, 1)).reshape(-1 ,)
-        return mean_squared_error(y_act, y_pred), len(features_batchmajor),  {"MSE": mean_squared_error(y_act, y_pred)}
-    '''
 # Start Flower client
 fl.client.start_numpy_client(server_address="172.31.18.91:8080", client=flClient())

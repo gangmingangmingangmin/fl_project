@@ -4,7 +4,7 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 from tensorflow.keras import layers
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, mean_absolute_percentage_error, mean_squared_log_error
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, mean_absolute_percentage_error
 
 
 client = boto3.client('s3')
@@ -16,18 +16,19 @@ response_iterator = paginator.paginate(
 file_list=[]
 for page in response_iterator:
     for content in page['Contents']:
-        if content['Key'][:10] =='parameters':
+        if content['Key'][:10] =='parameters' and content['Key'][11]=='.':
             file_list.append(content['Key'])
 s3 = boto3.resource('s3',region_name='ap-northeast-2')
 bucket = 'federatedlearning2'
 
+print(file_list)
 weights = []
 for i,item in enumerate(file_list):
     obj=s3.Object(bucket,item)
     objd = obj.get()['Body'].read()
     objO = pickle.loads(objd)
     weights.append(objO)
-    if i==0:
+    if i==1:
       break # cluster 수에 맞게 멈추기
 # weights average
 avg_weight=list()
@@ -71,13 +72,11 @@ mse = mean_squared_error(y_act, y_pred)
 r2 =r2_score(y_act, y_pred)
 mae = mean_absolute_error(y_act, y_pred)
 mape = mean_absolute_percentage_error(y_act, y_pred)
-msle = mean_squared_log_error(y_act, y_pred)
 f = open('/home/ec2-user/result.txt','w')
 f.write("mse : "+str(mse)+"\n")
 f.write("rmse : "+str(np.sqrt(mse))+"\n")
 f.write("r2 : "+str(r2)+"\n")
 f.write("mae : "+str(mae)+"\n")
 f.write("mape : "+str(mape)+"\n")
-f.write("msle : "+str(msle))
 f.close()
 

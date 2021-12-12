@@ -2,7 +2,7 @@
 
 import flwr as fl
 from typing import Callable, Dict, Optional, Tuple
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, mean_absolute_percentage_error, mean_squared_log_error
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, mean_absolute_percentage_error
 import sys
 import tensorflow as tf
 from tensorflow.keras import layers
@@ -11,8 +11,8 @@ import numpy as np
 import pickle
 
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
-NUM_ROUND=1
-NUM_EPOCHS = 10
+NUM_ROUND=5
+NUM_EPOCHS = 1
 
 #data load from boto3
 def divide_list(arr,n):
@@ -40,7 +40,7 @@ for page in response_iterator:
 #        file_n+=1
 
 # 데이터 수를 노드 수에 맞추기 위한 코드
-file_n = 108 #고정
+file_n = 54 #고정
 
 # 나머지 분배코드, 사용x
 if file_n % MIN_AVAILABLE_CLIENTS > 0:
@@ -48,6 +48,7 @@ if file_n % MIN_AVAILABLE_CLIENTS > 0:
 else:
     DIV = file_n//MIN_AVAILABLE_CLIENTS
 print(file_n,DIV)
+#test
 
 #fit strategy
 def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
@@ -81,30 +82,20 @@ def get_eval_fn(model):
         y_act = df_val_ts['y'].values
         y_act = scaler.inverse_transform(y_act.reshape(-1, 1)).reshape(-1 ,)
         #mean_squared_error, r2_score, mean_absolute_error, mean_absolute_percentage_error, mean_squared_log_error
-        f = open('/home/ec2-user/result.txt','r')
-        if len(f.read()) != 0:
-          f.close()
-          mse = mean_squared_error(y_act, y_pred)
-          r2 =r2_score(y_act, y_pred)
-          mae = mean_absolute_error(y_act, y_pred)
-          mape = mean_absolute_percentage_error(y_act, y_pred)
-          msle = mean_squared_log_error(y_act, y_pred)
-          f = open('/home/ec2-user/result.txt','a')
-          f.write("mse : "+str(mse)+"\n")
-          f.write("rmse : "+str(np.sqrt(mse))+"\n")
-          f.write("r2 : "+str(r2)+"\n")
-          f.write("mae : "+str(mae)+"\n")
-          f.write("mape : "+str(mape)+"\n")
-          f.write("msle : "+str(msle))
-          
-        else:
-          f.close()
-          f = open('/home/ec2-user/result.txt','a')
-          f.write("start")
-          f.close()
-          mse=0
-          r2=0
-        
+
+        mse = mean_squared_error(y_act, y_pred)
+        r2 =r2_score(y_act, y_pred)
+        mae = mean_absolute_error(y_act, y_pred)
+        mape = mean_absolute_percentage_error(y_act, y_pred)
+        f = open('/home/ec2-user/result.txt','w')
+        f.write("mse : "+str(mse)+"\n")
+        f.write("rmse : "+str(np.sqrt(mse))+"\n")
+        f.write("r2 : "+str(r2)+"\n")
+        f.write("mae : "+str(mae)+"\n")
+        f.write("mape : "+str(mape)+"\n")
+        f.close()
+        with open('/home/ec2-user/fl_project/data/full_lstm.pkl','wb') as f:
+          pickle.dump(weights,f)
         return mse, {"r2_score":r2}
 
     return evaluate
@@ -131,9 +122,5 @@ strategy = fl.server.strategy.FedAvg(
 
 #federated learning
 print('start')
-f = open('/home/ec2-user/result.txt','w')
-f.close()
 fl.server.start_server(config={"num_rounds": NUM_ROUND},strategy=strategy)
 
-
-print('processing time : '+str(end_time-start_time))
