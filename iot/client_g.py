@@ -30,6 +30,8 @@ if len(sys.argv[1]) == 3:
 else:
   cid = int(sys.argv[1][3:])-1
 ##############################################
+
+tf.random.set_seed(2)
 #loader
 class TimeSeriesLoader:
     def __init__(self,file_n,div,n_clients):

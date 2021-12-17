@@ -14,6 +14,9 @@ MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 NUM_ROUND=5
 NUM_EPOCHS = 1
 
+#init
+
+tf.random.set_seed(2)
 #data load from boto3
 def divide_list(arr,n):
     for i in range(0,len(arr),n):
@@ -94,8 +97,10 @@ def get_eval_fn(model):
         f.write("mae : "+str(mae)+"\n")
         f.write("mape : "+str(mape)+"\n")
         f.close()
+        '''
         with open('/home/ec2-user/fl_project/data/full_lstm.pkl','wb') as f:
           pickle.dump(weights,f)
+        '''
         return mse, {"r2_score":r2}
 
     return evaluate
