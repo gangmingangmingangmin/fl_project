@@ -17,6 +17,7 @@ import pickle
 from sklearn.linear_model import LogisticRegression
 np.random.seed(10)
 
+tf.random.set_seed(2)
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 NUM_ROUND=5
 NUM_EPOCHS = 1
@@ -82,7 +83,7 @@ def get_eval_fn(model):
         f.write("confusion_matrix : "+str(cm))
         f.close()
         '''
-        with open('/home/ec2-user/fl_project_data/full.pkl','wb') as f:
+        with open('/home/ec2-user/fl_project/data/full.pkl','wb') as f:
           pickle.dump(weights,f)
         '''
         return 0, {"err":0}

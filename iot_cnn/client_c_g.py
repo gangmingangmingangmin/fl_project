@@ -25,6 +25,8 @@ from tensorflow.keras.utils import Sequence
 import time
 import sys
 ##############################################
+
+tf.random.set_seed(2)
 if len(sys.argv[1]) == 3:
   gid = int(sys.argv[1][0])-1
   cid = int(sys.argv[1][2:])-1
