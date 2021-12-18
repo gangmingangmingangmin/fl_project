@@ -73,6 +73,7 @@ class TimeSeriesLoader:
         features_batchmajor = np.array(features).reshape(num_records, -1, 1)
         return features_batchmajor, target
 
+
 # Load and compile Keras model
 ts_inputs = tf.keras.Input(shape=(1008,1))
 x = layers.LSTM(units=10)(ts_inputs)
@@ -87,11 +88,13 @@ model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=0.01),
 
 # Define Flower client
 class flClient(fl.client.NumPyClient):
+    def __init__(self,model):
+      self.model = model
     def get_parameters(self):
-        return model.get_weights()
+        return self.model.get_weights()
 
     def fit(self,parameters,config):
-        model.set_weights(parameters)
+        self.model.set_weights(parameters)
         tss=TimeSeriesLoader(config['file_n'],config['div'],config['n_clients'])
         BATCH_SIZE = 128
         NUM_EPOCHS = config['epoch']
@@ -111,10 +114,10 @@ class flClient(fl.client.NumPyClient):
             for i in range(NUM_CHUNKS):
                 X, y = tss.get_chunk(i)
                 x_len+=len(X)
-                model.fit(x=X, y=y, batch_size=BATCH_SIZE)
+                self.model.fit(x=X, y=y, batch_size=BATCH_SIZE)
         
-        return model.get_weights(), x_len, {}
+        return self.model.get_weights(), x_len, {}
     def evaluate(self, parameters, config):
       return 0,0,{"no evaluation":0}
 # Start Flower client
-fl.client.start_numpy_client(server_address="172.31.18.91:8080", client=flClient())
+fl.client.start_numpy_client(server_address="172.31.18.91:8080", client=flClient(model))

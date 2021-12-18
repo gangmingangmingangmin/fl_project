@@ -52,7 +52,6 @@ else:
     DIV = file_n//MIN_AVAILABLE_CLIENTS
 print(file_n,DIV)
 #test
-
 #fit strategy
 def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
     def fit_config(rnd:int) -> Dict[str,str]:
