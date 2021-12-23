@@ -138,6 +138,9 @@ class flClient(fl.client.NumPyClient):
             X, y = self.tss.get_chunk()
             #model.fit(x=X, y=y, batch_size=BATCH_SIZE, validation_data = (self.tss.X_val, self.tss.y_val))
             model.fit(x=X, y=y, batch_size=BATCH_SIZE)
+        f = open('/home/ec2-user/num.txt','a')
+        f.write(str(rnd)+" num : "+str(NUM_CHUNKS)+"\n")
+        f.close()
         return model.get_weights(), NUM_CHUNKS, {}
     def evaluate(self, parameters, config):
       return 0,0,{"no evaluation":0}
