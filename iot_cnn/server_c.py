@@ -31,7 +31,7 @@ def divide_list(arr,n):
 
 
 # 데이터 수를 노드 수에 맞추기 위한 코드
-file_n = 50000 #고정 50000
+file_n = 4968 #고정 50000
 
 # 나머지 분배코드, 사용x
 if file_n % MIN_AVAILABLE_CLIENTS > 0:
@@ -96,7 +96,7 @@ img_col = 28
 input_shape = (img_row,img_col,1)
 
 
-batch_size = 128
+batch_size = int(216/MIN_AVAILABLE_CLIENTS)
 num_classes = 10
 
 model = Sequential()
