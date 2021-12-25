@@ -96,7 +96,8 @@ img_col = 28
 input_shape = (img_row,img_col,1)
 
 
-batch_size = int(216/MIN_AVAILABLE_CLIENTS)
+#batch_size = int(216/MIN_AVAILABLE_CLIENTS)
+batch_size = 128
 num_classes = 10
 
 model = Sequential()
