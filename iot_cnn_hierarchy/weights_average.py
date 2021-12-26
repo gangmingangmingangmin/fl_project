@@ -24,12 +24,13 @@ s3 = boto3.resource('s3',region_name='ap-northeast-2')
 bucket = 'federatedlearning2'
 
 weights = []
+print(file_list)
 for i,item in enumerate(file_list):
     obj=s3.Object(bucket,item)
     objd = obj.get()['Body'].read()
     objO = pickle.loads(objd)
     weights.append(objO)
-    if i==0:
+    if i==1:
       break # cluster 수에 맞게 멈추기
 # weights average
 avg_weight=list()

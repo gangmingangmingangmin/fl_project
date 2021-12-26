@@ -15,11 +15,20 @@ import pandas as pd
 import numpy as np
 import pickle
 np.random.seed(10)
+tf.random.set_seed(2)
 
+c2 = True
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 ssid = sys.argv[2][3] # sub server id
 NUM_ROUND=5
 NUM_EPOCHS = 1
+
+#cluseter 2개를 위한 setting
+if c2 == True:
+  if int(ssid) == 1:
+    cn = 13
+  else:
+    cn = 14
 
 #data load from boto3
 def divide_list(arr,n):
@@ -30,7 +39,7 @@ def divide_list(arr,n):
 
 
 # 데이터 수를 노드 수에 맞추기 위한 코드
-file_n = 5000 #고정 50000
+file_n = 4968 #고정 50000
 
 # 나머지 분배코드, 사용x
 if file_n % MIN_AVAILABLE_CLIENTS > 0:
@@ -71,7 +80,7 @@ img_col = 28
 input_shape = (img_row,img_col,1)
 
 
-batch_size = 128
+batch_size = int(216/MIN_AVAILABLE_CLIENTS)
 num_classes = 10
 
 model = Sequential()
@@ -88,15 +97,26 @@ model.add(Dropout(0.5))
 model.add(Dense(num_classes, activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
+if c2==True:
 
-strategy = fl.server.strategy.FedAvg(
-    fraction_fit=1,  # Sample 10% of available clients for the next round
-    min_fit_clients=9,  # Minimum number of clients to be sampled for the next round
-    min_available_clients=9,  # Minimum number of clients that need to be connected to the server before a training round can start
-    min_eval_clients=9, # default = 2
-    on_fit_config_fn=get_on_fit_config_fn(),
-    eval_fn = get_eval_fn(model)
-)
+   
+  strategy = fl.server.strategy.FedAvg(
+      fraction_fit=1,  # Sample 10% of available clients for the next round
+      min_fit_clients=cn,  # Minimum number of clients to be sampled for the next round
+      min_available_clients=cn,  # Minimum number of clients that need to be connected to the server before a training round can start
+      min_eval_clients=cn, # default = 2
+      on_fit_config_fn=get_on_fit_config_fn(),
+      eval_fn = get_eval_fn(model)
+  )
+else:
+  strategy = fl.server.strategy.FedAvg(
+      fraction_fit=1,  # Sample 10% of available clients for the next round
+      min_fit_clients=9,  # Minimum number of clients to be sampled for the next round
+      min_available_clients=9,  # Minimum number of clients that need to be connected to the server before a training round can start
+      min_eval_clients=9, # default = 2
+      on_fit_config_fn=get_on_fit_config_fn(),
+      eval_fn = get_eval_fn(model)
+  )
 
 import time
 #federated learning
