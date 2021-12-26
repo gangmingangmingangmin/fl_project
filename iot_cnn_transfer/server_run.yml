@@ -4,18 +4,13 @@
   - hosts: iotmasterservers
     tasks:
       - name: run server
-        command: "python3 /home/ec2-user/fl_project/iot_cnn_transfer/server_c.py 2"
+        command: "python3 /home/ec2-user/fl_project/iot_cnn_transfer/server_c.py 1"
         async: 36000
         poll: 0
       - name: sleep
         command: "python3 /home/ec2-user/fl_project/iot_cnn_transfer/sleep.py"
   - hosts: iotslaveservers*
     tasks:
-      - name: copy pkl
-        copy:
-          src: /home/ec2-user/full.pkl
-          dest: /home/ec2-user
-          mode: 0755
       - name: Upload client file
         copy:
           src: ./client_c_g_t.py

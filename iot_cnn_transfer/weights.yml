@@ -1,0 +1,10 @@
+# upload_run.yml
+
+---
+  - hosts: iotslaveservers*
+    tasks:
+      - name: copy pkl
+        copy:
+          src: /home/ec2-user/fl_project/data/full.pkl
+          dest: /home/ec2-user
+          mode: 0755

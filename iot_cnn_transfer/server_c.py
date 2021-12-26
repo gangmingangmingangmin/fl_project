@@ -17,6 +17,7 @@ import pickle
 from sklearn.linear_model import LogisticRegression
 np.random.seed(10)
 
+tf.random.set_seed(2)
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 NUM_ROUND=5
 NUM_EPOCHS = 1
@@ -30,7 +31,7 @@ def divide_list(arr,n):
 
 
 # 데이터 수를 노드 수에 맞추기 위한 코드
-file_n = 5000 #고정 50000
+file_n = 4968 #고정 50000
 
 # 나머지 분배코드, 사용x
 if file_n % MIN_AVAILABLE_CLIENTS > 0:
