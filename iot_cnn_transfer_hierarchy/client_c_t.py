@@ -31,11 +31,12 @@ if len(sys.argv[1]) == 3:
 else:
   cid = int(sys.argv[1][3:])-1
 ##############################################
+tf.random.set_seed(2)
 #loader
 class TimeSeriesLoader:
     def __init__(self,file_n,div,n_clients):
         if n_clients>9:
-          self.start_index=gid*div+cid*555
+          self.start_index=gid*div+cid*552
         else:
           self.start_index=cid*div
         #min_n = min(file_n,self.start_index+div)# 파일 크기 안넘도록
@@ -62,8 +63,8 @@ class TimeSeriesLoader:
         y_train = tf.keras.utils.to_categorical(y_train,10)
         self.X_train = X_train
         self.y_train = y_train
-        self.X_val = X_train[50000:51000]
-        self.y_val = y_train[50000:51000]
+        #self.X_val = X_train[50000:51000]
+        #self.y_val = y_train[50000:51000]
     def num_chunks(self):
         return self.num_files
 
@@ -109,16 +110,19 @@ for layer in model.layers[:5]:
 
 # Define Flower client
 class flClient(fl.client.NumPyClient):
+    def __init__(self):
+        self.tss = None
     def get_parameters(self):
         return model.get_weights()[4:]
 
     def fit(self,parameters,config):
         new_weights = model.get_weights()[:4] + parameters
         model.set_weights(new_weights)
-        tss=TimeSeriesLoader(config['file_n'],config['div'],config['n_clients'])
+        if self.tss == None:
+          self.tss=TimeSeriesLoader(config['file_n'],config['div'],config['n_clients'])
         BATCH_SIZE = 128
         NUM_EPOCHS = config['epoch']
-        NUM_CHUNKS = tss.num_chunks()
+        NUM_CHUNKS = self.tss.num_chunks()
         rnd = config['round']-1
         
         NUM_CHUNKS_LIST=[]
@@ -133,10 +137,11 @@ class flClient(fl.client.NumPyClient):
             print('epoch #{}'.format(epoch))
             #for i in range(NUM_CHUNKS_LIST[rnd][0],NUM_CHUNKS_LIST[rnd][1]):
             #for i in range(NUM_CHUNKS):
-            X, y = tss.get_chunk()
-            model.fit(x=X, y=y, batch_size=BATCH_SIZE, validation_data = (tss.X_val, tss.y_val))
+            X, y = self.tss.get_chunk()
+            #model.fit(x=X, y=y, batch_size=BATCH_SIZE, validation_data = (tss.X_val, tss.y_val))
+            model.fit(x=X, y=y, batch_size=BATCH_SIZE)
         return model.get_weights()[4:], len(X), {}
     def evaluate(self, parameters, config):
       return 0,0,{"no evaluation":0}
 # Start Flower client
-fl.client.start_numpy_client(server_address="172.31.17.97:8080", client=flClient())
+fl.client.start_numpy_client(server_address="172.31.31.17:8080", client=flClient())
