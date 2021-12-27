@@ -10,9 +10,18 @@ import numpy as np
 import pickle
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 ssid = sys.argv[2][3]
+np.random.seed(10)
+
+c2 = True
+if c2 == True:
+  if int(ssid) == 1:
+    cn = 13
+  else:
+    cn = 14
+
 NUM_ROUND=5
 EPOCH = 1
-
+tf.random.set_seed(2)
 #data load from boto3
 def divide_list(arr,n):
     for i in range(0,len(arr),n):
@@ -72,14 +81,25 @@ model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=0.01),
           loss=tf.keras.losses.MeanSquaredError(),
           metrics=['mse'])
 
-strategy = fl.server.strategy.FedAvg(
+if c2 == True:
+  strategy = fl.server.strategy.FedAvg(
     fraction_fit=1,  # Sample 10% of available clients for the next round
-    min_fit_clients=9,  # Minimum number of clients to be sampled for the next round
-    min_available_clients=9,  # Minimum number of clients that need to be connected to the server before a training round can start
-    min_eval_clients=9, # default = 2
+    min_fit_clients=cn,  # Minimum number of clients to be sampled for the next round
+    min_available_clients=cn,  # Minimum number of clients that need to be connected to the server before a training round can start
+    min_eval_clients=cn, # default = 2
     on_fit_config_fn=get_on_fit_config_fn(),
     eval_fn = get_eval_fn(model)
-)
+  )
+else:
+
+  strategy = fl.server.strategy.FedAvg(
+      fraction_fit=1,  # Sample 10% of available clients for the next round
+      min_fit_clients=9,  # Minimum number of clients to be sampled for the next round
+      min_available_clients=9,  # Minimum number of clients that need to be connected to the server before a training round can start
+      min_eval_clients=9, # default = 2
+      on_fit_config_fn=get_on_fit_config_fn(),
+      eval_fn = get_eval_fn(model)
+  )
 
 import time
 #federated learning
