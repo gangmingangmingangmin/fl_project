@@ -30,7 +30,7 @@ if len(sys.argv[1]) == 3:
 else:
   cid = int(sys.argv[1][3:])-1
 ##############################################
-
+np.random.seed(10)
 tf.random.set_seed(2)
 #loader
 class TimeSeriesLoader:
@@ -90,15 +90,17 @@ model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=0.01),
 class flClient(fl.client.NumPyClient):
     def __init__(self,model):
       self.model = model
+      self.tss = None
     def get_parameters(self):
         return self.model.get_weights()
 
     def fit(self,parameters,config):
         self.model.set_weights(parameters)
-        tss=TimeSeriesLoader(config['file_n'],config['div'],config['n_clients'])
-        BATCH_SIZE = 128
+        if self.tss == None:
+          self.tss =TimeSeriesLoader(config['file_n'],config['div'],config['n_clients'])
+        BATCH_SIZE = int(1296/config['n_clients'])
         NUM_EPOCHS = config['epoch']
-        NUM_CHUNKS = tss.num_chunks()
+        NUM_CHUNKS = self.tss.num_chunks()
         rnd = config['round']-1
         NUM_CHUNKS_LIST=[]
         index=0
@@ -112,7 +114,7 @@ class flClient(fl.client.NumPyClient):
             print('epoch #{}'.format(epoch))
             #for i in range(NUM_CHUNKS_LIST[rnd][0],NUM_CHUNKS_LIST[rnd][1]):
             for i in range(NUM_CHUNKS):
-                X, y = tss.get_chunk(i)
+                X, y = self.tss.get_chunk(i)
                 x_len+=len(X)
                 self.model.fit(x=X, y=y, batch_size=BATCH_SIZE)
         

@@ -9,6 +9,7 @@ from tensorflow.keras import layers
 import pandas as pd
 import numpy as np
 import pickle
+np.random.seed(10)
 
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 NUM_ROUND=5
