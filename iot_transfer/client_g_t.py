@@ -30,6 +30,8 @@ if len(sys.argv[1]) == 3:
 else:
   cid = int(sys.argv[1][3:])-1
 ##############################################
+tf.random.set_seed(2)
+np.random.seed(10)
 #loader
 class TimeSeriesLoader:
     def __init__(self,file_n,div,n_clients):
@@ -90,16 +92,21 @@ for layer in model.layers[:3]:
 
 # Define Flower client
 class flClient(fl.client.NumPyClient):
+    def __init__(self,model):
+        self.model = model
+        self.tss = None
+    
     def get_parameters(self):
-        return model.get_weights()[3:]
+        return self.model.get_weights()[3:]
 
     def fit(self,parameters,config):
-        new_weights = model.get_weights()[:3] + parameters
-        model.set_weights(new_weights)
-        tss=TimeSeriesLoader(config['file_n'],config['div'],config['n_clients'])
-        BATCH_SIZE = 128
+        new_weights = self.model.get_weights()[:3] + parameters
+        self.model.set_weights(new_weights)
+        if self.tss == None:
+          self.tss=TimeSeriesLoader(config['file_n'],config['div'],config['n_clients'])
+        BATCH_SIZE = int(1296/config['n_clients'])
         NUM_EPOCHS = config['epoch']
-        NUM_CHUNKS = tss.num_chunks()
+        NUM_CHUNKS = self.tss.num_chunks()
         rnd = config['round']-1
         NUM_CHUNKS_LIST=[]
         index=0
@@ -113,12 +120,12 @@ class flClient(fl.client.NumPyClient):
             print('epoch #{}'.format(epoch))
             #for i in range(NUM_CHUNKS_LIST[rnd][0],NUM_CHUNKS_LIST[rnd][1]):
             for i in range(NUM_CHUNKS):
-                X, y = tss.get_chunk(i)
+                X, y = self.tss.get_chunk(i)
                 x_len+=len(X)
-                model.fit(x=X, y=y, batch_size=BATCH_SIZE)
+                self.model.fit(x=X, y=y, batch_size=BATCH_SIZE)
         
-        return model.get_weights()[3:], x_len, {}
+        return self.model.get_weights()[3:], x_len, {}
     def evaluate(self, parameters, config):
       return 0,0,{"no evaluation":0}
 # Start Flower client
-fl.client.start_numpy_client(server_address="172.31.18.91:8080", client=flClient())
+fl.client.start_numpy_client(server_address="172.31.18.91:8080", client=flClient(model))

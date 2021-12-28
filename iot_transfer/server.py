@@ -13,6 +13,8 @@ import pickle
 MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 NUM_ROUND=5
 NUM_EPOCHS = 1
+np.random.seed(10)
+tf.random.set_seed(2)
 
 #data load from boto3
 def divide_list(arr,n):

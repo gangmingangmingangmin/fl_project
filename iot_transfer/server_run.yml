@@ -4,7 +4,7 @@
   - hosts: iotmasterservers
     tasks:
       - name: run server
-        command: "python3 /home/ec2-user/fl_project/iot_transfer/server.py 3"
+        command: "python3 /home/ec2-user/fl_project/iot_transfer/server.py 1"
         async: 36000
         poll: 0
       - name: sleep
