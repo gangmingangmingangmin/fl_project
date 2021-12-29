@@ -12,7 +12,7 @@ MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 ssid = sys.argv[2][3]
 np.random.seed(10)
 
-c2 = True
+c2 = False
 if c2 == True:
   if int(ssid) == 1:
     cn = 13

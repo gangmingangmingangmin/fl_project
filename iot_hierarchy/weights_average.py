@@ -28,7 +28,7 @@ for i,item in enumerate(file_list):
     objd = obj.get()['Body'].read()
     objO = pickle.loads(objd)
     weights.append(objO)
-    if i==1:
+    if i==2:
       break # cluster 수에 맞게 멈추기
 # weights average
 avg_weight=list()

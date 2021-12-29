@@ -12,7 +12,8 @@ MIN_AVAILABLE_CLIENTS=int(sys.argv[1])
 ssid = sys.argv[2][3]
 NUM_ROUND=5
 EPOCH = 1
-
+np.random.seed(10)
+tf.random.set_seed(2)
 #data load from boto3
 def divide_list(arr,n):
     for i in range(0,len(arr),n):
@@ -32,6 +33,13 @@ for page in response_iterator:
 
 file_n = 54 #고정
 
+c2 = False
+#cluster 2개를 위한 setting
+if c2 == True:
+  if int(ssid) == 1:
+    cn = 13
+  else:
+    cn = 14
 
 if file_n % MIN_AVAILABLE_CLIENTS > 0:
     DIV = file_n // MIN_AVAILABLE_CLIENTS +1
@@ -77,14 +85,25 @@ with open('/home/ec2-user/full_lstm.pkl','rb') as f:
   w = pickle.load(f)
 model.set_weights(w)
 
-strategy = fl.server.strategy.FedAvg(
-    fraction_fit=1,  # Sample 10% of available clients for the next round
-    min_fit_clients=9,  # Minimum number of clients to be sampled for the next round
-    min_available_clients=9,  # Minimum number of clients that need to be connected to the server before a training round can start
-    min_eval_clients=9, # default = 2
-    on_fit_config_fn=get_on_fit_config_fn(),
-    eval_fn = get_eval_fn(model)
-)
+if c2 == True:
+  strategy = fl.server.strategy.FedAvg(
+      fraction_fit=1,  # Sample 10% of available clients for the next round
+      min_fit_clients=cn,  # Minimum number of clients to be sampled for the next round
+      min_available_clients=cn,  # Minimum number of clients that need to be connected to the server before a training round can start
+      #min_eval_clients=cn, # default = 2
+      on_fit_config_fn=get_on_fit_config_fn(),
+      eval_fn = get_eval_fn(model)
+  )
+
+else:  
+  strategy = fl.server.strategy.FedAvg(
+      fraction_fit=1,  # Sample 10% of available clients for the next round
+      min_fit_clients=9,  # Minimum number of clients to be sampled for the next round
+      min_available_clients=9,  # Minimum number of clients that need to be connected to the server before a training round can start
+      min_eval_clients=9, # default = 2
+      on_fit_config_fn=get_on_fit_config_fn(),
+      eval_fn = get_eval_fn(model)
+  )
 
 import time
 #federated learning

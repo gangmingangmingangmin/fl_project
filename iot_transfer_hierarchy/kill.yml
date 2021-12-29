@@ -1,7 +1,7 @@
 # kill.yml
 
 ---
-  - hosts: iotsubmasterservers,iotslaveservers*
+  - hosts: iotsubmasterservers,iotslaveservers*,iotmasterservers
     tasks:
       - name: kill process
         #command: "ps -ef '|' grep python '|' awk '{print $2}' '|' xargs kill -9"

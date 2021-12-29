@@ -9,7 +9,7 @@
           dest: /home/ec2-user
           mode: 0755
       - name: run server
-        command: "python3 ./server.py 18 {{ inventory_hostname }}"
+        command: "python3 ./server.py 27 {{ inventory_hostname }}"
         async: 3600
         poll: 0
   - hosts: iotmasterservers
